@@ -12,12 +12,12 @@ using namespace std;
 
 int main()
 {
-    std::cout << "Hello World!\n"; 
-
 	string line; // used to read one line of the file at a time
 
-	regex g_string("\".*\"");
-	regex comment("#");
+	regex g_string("\".*\""); // a well formed string
+	regex comment("\\*?#"); // struggling to figure out how to allow use if there's an escape character // ISSUE
+	regex prop("="); // can use prefix and suffix to send well-formed data into entries as keys and values
+	regex section("\\[\\w+(:)?\\w+\\]"); // pulls out sections and subsections (haven't tested yet)
 	smatch match;
 
 	// Read in the file
@@ -27,12 +27,8 @@ int main()
 	// Check if the file was opened properly
 	if (myFile.is_open()) {
 		while (getline(myFile, line)) {
-			if (regex_search(line, match, g_string)) {
-				cout << "correct string - " << match.str() << '\n';
-				//line = match.prefix();
-			}
 			// If the line includes a # then we only want to use the part of the line before that
-			else if (regex_search(line, match, comment)) {
+			if (regex_search(line, match, comment)) {
 				line = match.prefix();
 			}
 			cout << line << '\n';
@@ -43,8 +39,9 @@ int main()
 	}
 	else cout << "Unable to open file";
 	
-
-	return 0;
+	cin.get();
+	//return 0;
+	
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

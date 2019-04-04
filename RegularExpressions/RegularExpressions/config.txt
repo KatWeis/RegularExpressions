@@ -16,3 +16,5 @@ DX12Flag=true
 headphones=whatever # This is a malformed line 
 @=trueifIfeellikeit # Really should break! 
 []   # This should break!
+
+"\#" # This should stay
