@@ -16,6 +16,7 @@ int main()
 
 	string line; // used to read one line of the file at a time
 
+	regex g_string("\".*\"");
 	regex comment("#");
 	smatch match;
 
@@ -26,8 +27,12 @@ int main()
 	// Check if the file was opened properly
 	if (myFile.is_open()) {
 		while (getline(myFile, line)) {
+			if (regex_search(line, match, g_string)) {
+				cout << "correct string - " << match.str() << '\n';
+				//line = match.prefix();
+			}
 			// If the line includes a # then we only want to use the part of the line before that
-			if (regex_search(line, match, comment)) {
+			else if (regex_search(line, match, comment)) {
 				line = match.prefix();
 			}
 			cout << line << '\n';
