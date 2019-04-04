@@ -2,11 +2,44 @@
 //
 
 #include "pch.h"
-#include <iostream>
+
+#include <fstream>
+#include <regex>
+
+#include "Settings.h"
+
+using namespace std;
 
 int main()
 {
     std::cout << "Hello World!\n"; 
+
+	string line; // used to read one line of the file at a time
+
+	regex comment("#");
+	smatch match;
+
+	// Read in the file
+	ifstream myFile;
+	myFile.open("config.txt");
+
+	// Check if the file was opened properly
+	if (myFile.is_open()) {
+		while (getline(myFile, line)) {
+			// If the line includes a # then we only want to use the part of the line before that
+			if (regex_search(line, match, comment)) {
+				line = match.prefix();
+			}
+			cout << line << '\n';
+		}
+
+		// Close the file
+		myFile.close();
+	}
+	else cout << "Unable to open file";
+	
+
+	return 0;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
