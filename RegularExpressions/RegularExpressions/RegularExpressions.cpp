@@ -12,35 +12,53 @@ using namespace std;
 
 int main()
 {
-	string line; // used to read one line of the file at a time
+	//string line; // used to read one line of the file at a time
 
-	regex g_string("\".*\""); // a well formed string
-	regex comment("\\*?#"); // struggling to figure out how to allow use if there's an escape character // ISSUE
-	regex prop("="); // can use prefix and suffix to send well-formed data into entries as keys and values
-	regex section("\\[\\w+(:)?\\w+\\]"); // pulls out sections and subsections (haven't tested yet)
-	smatch match;
+	//regex g_string("\".*\""); // a well formed string
+	//regex comment("\\*?#"); // struggling to figure out how to allow use if there's an escape character // ISSUE
+	//regex prop("="); // can use prefix and suffix to send well-formed data into entries as keys and values
+	//regex section("\\[\\w+(:\\w+)?\\]"); // pulls out sections and subsections (haven't tested yet)
+	//smatch match;
 
-	// Read in the file
-	ifstream myFile;
-	myFile.open("config.txt");
+	//// Read in the file
+	//ifstream myFile;
+	//myFile.open("config.txt");
 
-	// Check if the file was opened properly
-	if (myFile.is_open()) {
-		while (getline(myFile, line)) {
-			// If the line includes a # then we only want to use the part of the line before that
-			if (regex_search(line, match, comment)) {
-				line = match.prefix();
-			}
-			cout << line << '\n';
-		}
+	string file = "config.txt";
 
-		// Close the file
-		myFile.close();
+	Settings* s = new Settings();
+
+	while (s->ParseConfigFile(file) == false) {
+		cout << "Config file could not be loaded for the above reasons. Please enter the filepath to a different config file - ";
+
+		getline(cin, file);
 	}
-	else cout << "Unable to open file";
+
+	//// Check if the file was opened properly
+	//if (myFile.is_open()) {
+	//	while (getline(myFile, line)) {
+	//		// Check if the line includes a section
+	//		if (regex_search(line, match, section)) {
+	//			cout << "Section - " << match[0] << ", Subsection - " << match.str(1) << "\n";
+	//		}
+	//		// If the line includes a # then we only want to use the part of the line before that
+	//		if (regex_search(line, match, comment)) {
+	//			line = match.prefix();
+	//		}
+	//		cout << line << '\n';
+	//	}
+
+	//	// Close the file
+	//	myFile.close();
+	//}
+	//else cout << "Unable to open file";
 	
 	cin.get();
+
+	delete s;
 	//return 0;
+
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	
 }
 

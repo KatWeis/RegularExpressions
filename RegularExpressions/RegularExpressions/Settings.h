@@ -3,6 +3,9 @@
 #include <map>
 #include <vector>
 
+#include <fstream>
+#include <regex>
+
 using namespace std;
 
 template <class T>
@@ -59,8 +62,8 @@ public:
 	Entry<T>* GetEntry(string name);
 
 private:
-	map<string, Section> subsections; // Hash table of names to subsections
-	map<string, Entry<void*>> entries; // Hash table of names to Entries
+	map<string, Section*> subsections; // Hash table of names to subsections
+	map<string, Entry<void*>*> entries; // Hash table of names to Entries
 
 	bool isSubsection; // Boolean marking this as a section or subsection
 
@@ -76,8 +79,8 @@ public:
 	Settings();
 	~Settings();
 
-	// Return a list of all sections from the config file
-	void ParseConfigFile(string filepath);
+	// Attempt to parse the passed in config file and return whether it was successful or not
+	bool ParseConfigFile(string filepath);
 
 	// Return a list of all sections from the config file
 	vector<Section*> ListAllSections();

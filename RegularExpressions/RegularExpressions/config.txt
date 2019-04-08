@@ -8,11 +8,13 @@ multilist={"bob", 10, true}
 [video] 
 resolution="1080x700" 
 scalefactor=1.0f 
-multidisplay=true 
+factor=1
+multidisplay=true
 
 [video:acceleration] 
 DX12Flag=true 
-[audio] surround= 
+[audio] 
+surround= 
 headphones=whatever # This is a malformed line 
 @=trueifIfeellikeit # Really should break! 
 []   # This should break!
