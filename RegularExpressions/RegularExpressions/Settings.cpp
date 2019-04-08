@@ -8,17 +8,16 @@ bool Settings::ParseConfigFile(string filepath)
 	int lineNum = 0; //var to keep track of which line has the error on it
 	
 	//sections.insert_or_assign(secName, newSec);
-
+	
 
 
 	// ^^ above is just test code
 
 	// Regex expressions to check
-	regex prop_str("\".*\""); // a well formed string
 	regex comment("\\*?#"); // struggling to figure out how to allow use if there's an escape character // ISSUE
-	regex prop("="); // can use prefix and suffix to send well-formed data into entries as keys and values
 	regex section("\\[(\\w+)(:\\w+)?\\]"); // pulls out sections and subsections (tested basic, but not edge-cases)
-	regex entry("(\\w+)=((\".*\")|(true|TRUE|false|FALSE)|(\\d+\\.\\d+f$)|([0-9]+))"); // any alpha-numeric on the left (no spaces), then an =, then a valid value type
+	regex entry("(\\w+)=(((\".*\")|(true|TRUE|false|FALSE)|(\\d+\\.\\d+f$)|([0-9]+))|(\\{(.+[,;]?)+\\}))"); // any alpha-numeric on the left (no spaces), then an =, then a valid value type
+	regex list("((\".*\")|(true|TRUE|false|FALSE)|(\\d+\\.\\d+f$)|([0-9]+))");
 
 	string line; // used to read one line of the file at a time
 	smatch match; // Stores any successful matches from the regex
@@ -45,6 +44,11 @@ bool Settings::ParseConfigFile(string filepath)
 				currentSection = match[1]; // the section
 				string tempSub = match[2]; // the subsection
 				currentSubsection = tempSub.erase(0, 1); // remove the semi-colon from the subsection's string
+
+				// Add the sections
+				if (sections[currentSection]->GetSubsection(currentSubsection) == nullptr) {
+
+				}
 			}
 			// Check if the line includes a property/entry
 			if (regex_search(line, match, entry)) {
@@ -57,10 +61,31 @@ bool Settings::ParseConfigFile(string filepath)
 				}
 				else {
 					string value;
+					if (match.str(9) != "") { // Multilist
+						value = match.str(9);
+						smatch listMatch; // Stores any successful matches from the regex for the list
+
+						regex_search(value, listMatch, list);
+
+						if (listMatch.length() < count(value.begin(), value.end(), ';')-1) {
+							cout << "Malformed config line on line # - " << lineNum << endl;
+							cout << "Lists must be made up of accepted value types (string, float, int, or bool)" << endl;
+							parsed = false;
+							break; // break out of the loop because we don't need to continue after failure
+						}
+
+						// Add to the current section and subsection as a list/vector type
+					}
 					if (match.str(3) != "") { // STRING
 						value = match.str(3);
 
 						// Replace spaces with dashes "as-is"
+						for (int i = 0; i < value.size(); i++) {
+							if (value[i] == ' ') {
+								value[i] = '-';
+							}
+						}
+							
 
 						// Add to the current section and subsection as a string type
 					}
@@ -88,8 +113,8 @@ bool Settings::ParseConfigFile(string filepath)
 						}
 						// Add to the current section and subsection as a integer type
 					}
-					if (match.str(7) != "") { // Multilist
-						value = match.str(7);
+					if (match.str(10) != "") { // DEFAULT -- empty right side
+						value = match.str(10);
 
 						// Add to the current section and subsection as a list/vector type
 					}

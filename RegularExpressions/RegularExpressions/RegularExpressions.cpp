@@ -25,14 +25,35 @@ int main()
 	//myFile.open("config.txt");
 
 	string file = "config.txt";
+	bool running = true;
 
 	Settings* s = new Settings();
 
+	// Setup the file
 	while (s->ParseConfigFile(file) == false) {
 		cout << "Config file could not be loaded for the above reasons. Please enter the filepath to a different config file - ";
 
 		getline(cin, file);
+
+		if (file == "q") {
+			running = false;
+			break;
+		}
 	}
+
+	// Do main loop
+	while (running) {
+
+
+
+		getline(cin, file);
+
+		if (file == "q") {
+			running = false;
+		}
+	}
+
+	
 
 	//// Check if the file was opened properly
 	//if (myFile.is_open()) {
