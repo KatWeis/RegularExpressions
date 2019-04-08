@@ -5,8 +5,6 @@ player="chris"
 chartype="blue tower" 
 attributes={10; 20; 40; 70} 
 multilist={"bob", 10, true} 
-badlist={}
-worselist{yo}
 [video] 
 resolution="1080x700" 
 scalefactor=1.0f 

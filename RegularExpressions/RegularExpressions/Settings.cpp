@@ -26,6 +26,10 @@ bool Settings::ParseConfigFile(string filepath)
 	string currentSection = "";
 	string currentSubsection = "";
 
+	vector<Section*> subsects;
+	vector<Entry<void*>*> entries;
+	Section* sec = new Section(currentSection, subsects, entries, false);
+
 	// PUT FILE LOADING HERE
 
 	// Read in the file
@@ -46,12 +50,27 @@ bool Settings::ParseConfigFile(string filepath)
 				currentSubsection = tempSub.erase(0, 1); // remove the semi-colon from the subsection's string
 
 				// Add the sections
-				if (sections[currentSection]->GetSubsection(currentSubsection) == nullptr) {
+				if (sections[currentSection] == nullptr) {
+					subsects.clear();
 
+					if (currentSubsection != "")
+					{
+						subsects.push_back(new Section(currentSubsection, vector<Section*>(), vector<Entry<void*>*>(), true));
+					}
+					sec = new Section(currentSection, subsects, entries, false);
+				}
+				else
+				{
+					if (currentSubsection != "")
+					{
+						subsects = sections[currentSection]->GetAllSubsections();
+						subsects.push_back(new Section(currentSubsection, vector<Section*>(), vector<Entry<void*>*>(), true));
+					}
+					sec = new Section(currentSection, subsects, entries, false);
 				}
 			}
 			// Check if the line includes a property/entry
-			if (regex_search(line, match, entry)) {
+			else if (regex_search(line, match, entry)) {
 				// Must be within a section/subsection
 				if (currentSection == ""){
 					cout << "Malformed config line on line # - " << lineNum << endl;
@@ -75,6 +94,8 @@ bool Settings::ParseConfigFile(string filepath)
 						}
 
 						// Add to the current section and subsection as a list/vector type
+						//entries.push_back(new Entry<vector<void*>>(match.str(1), listMatch)); -- Not currently working, 
+						//could probably figure it out with time and sleep, which i don't have right now
 					}
 					if (match.str(3) != "") { // STRING
 						value = match.str(3);
@@ -88,16 +109,19 @@ bool Settings::ParseConfigFile(string filepath)
 							
 
 						// Add to the current section and subsection as a string type
+						//entries.push_back(new Entry<string>(match.str(1), match.str(3)));
 					}
 					else if (match.str(4) != "") { // BOOL
 						value = match.str(4);
 
 						// Add to the current section and subsection as a boolean type
+						//entries.push_back(new Entry<bool>(match.str(1), match.str(4)));
 					}
 					if (match.str(5) != "") { // FLOAT
 						value = match.str(5);
 
 						// Add to the current section and subsection as an float type
+						//entries.push_back(new Entry<float>(match.str(1), match.str(5)));
 					}
 					else if (match.str(6) != "") { // INTEGER
 						value = match.str(6);
@@ -112,20 +136,32 @@ bool Settings::ParseConfigFile(string filepath)
 							break; // break out of the loop because we don't need to continue after failure
 						}
 						// Add to the current section and subsection as a integer type
+						//entries.push_back(new Entry<int>(match.str(1), match.str(6)));
 					}
 					if (match.str(10) != "") { // DEFAULT -- empty right side
 						value = match.str(10);
 
-						// Add to the current section and subsection as a list/vector type
+						// Add to the current section and subsection as the default type
+
 					}
+					
 					cout << "Key - " << match.str(1) << ", Value - " << value << "\n";
 				}
 			}
 			// If the line includes a # then we only want to use the part of the line before that
-			if (regex_search(line, match, comment)) {
+			else if (regex_search(line, match, comment)) {
 				line = match.prefix();
 			}
-			cout << line << '\n';
+			else if (!regex_search(line, match, regex("\\S"))) {
+				// Ignore the white space
+			}
+			else{
+				cout << "Malformed config line on line # - " << lineNum << endl;
+				cout << "Line doesn't create a key-value pair using one of the allowed types (string, float, int, or bool)" << endl;
+				parsed = false;
+				break; // break out of the loop because we don't need to continue after failure
+			}
+			//cout << line << '\n';
 		}
 
 		// Close the file
@@ -168,7 +204,7 @@ Settings::~Settings()
 	
 }
 
-Section::Section(string name, vector<Section*> subs, bool isSub)
+Section::Section(string name, vector<Section*> subs, vector<Entry<void*>*> ents, bool isSub)
 {
 	this->name = name;
 	isSubsection = isSub;
@@ -179,10 +215,13 @@ Section::Section(string name, vector<Section*> subs, bool isSub)
 		{
 			subsections.insert_or_assign(subs[i]->name, subs[i]);
 		}
-		
 	}
 
 	// move over Entries from vector to map of entries
+	for (size_t i = 0; i < ents.size(); i++)
+	{
+		entries.insert_or_assign(ents[i]->GetKey(), ents[i]);
+	}
 }
 
 Section::~Section()
@@ -208,6 +247,17 @@ void Section::ListAllEntries()
 	for (map<string, Entry<void*>*>::iterator it = entries.begin(); it != entries.end(); ++it) {
 		std::cout << (it->second)->GetKey() << " : " << (it->second)->GetValue();
 	}
+}
+
+vector<Section*> Section::GetAllSubsections()
+{
+	vector<Section*> allSubSecs;
+
+	for (map<string, Section*>::iterator it = subsections.begin(); it != subsections.end(); ++it) {
+		allSubSecs.push_back(it->second);
+	}
+
+	return allSubSecs;
 }
 
 Section* Section::GetSubsection(string name)

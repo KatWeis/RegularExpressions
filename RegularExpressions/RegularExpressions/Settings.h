@@ -45,7 +45,7 @@ inline Entry<T>::~Entry()
 class Section
 {
 public:
-	Section(string name, vector<Section*> subs, bool isSub);
+	Section(string name, vector<Section*> subs, vector<Entry<void*>*> ents, bool isSub);
 	~Section();
 
 	// List subsections for a named section
@@ -53,6 +53,9 @@ public:
 
 	// List all key/value pairs for a section/subsection
 	void ListAllEntries();
+
+	// Return a vector of subsections for the section
+	vector<Section*> GetAllSubsections();
 
 	// Gets a subsection by name from a named section
 	Section* GetSubsection(string name);
